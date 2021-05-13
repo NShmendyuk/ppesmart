@@ -8,11 +8,14 @@ import java.util.Objects;
 @DataType()
 public final class PPE {
 
+    /**
+     * Инвентарный номер СИЗа
+     */
     @Property()
-    private final String ppeID;
+    private final String inventoryNumber;
 
     /**
-     * Фамилия, имя, отчетсво сотрудника
+     * Фамилия, имя, отчество сотрудника
      */
     @Property()
     private final String ownerName;
@@ -36,12 +39,6 @@ public final class PPE {
     private final Float price;
 
     /**
-     * Инвентарный номер СИЗа
-     */
-    @Property()
-    private final String inventoryNumber;
-
-    /**
      * Дата поступления СИЗа в эксплуатацию
      */
     //TODO: timestamp
@@ -54,18 +51,11 @@ public final class PPE {
     @Property()
     private final Integer lifeTime;
 
+    /**
+     * Организация
+     */
     @Property()
     private final String subsidiary;
-
-    @Property()
-    private final String prevSubsidiary;
-
-//    @Property()
-//    private final int size;
-
-    public String getppeID() {
-        return ppeID;
-    }
 
     public String getOwnerName() {
         return ownerName;
@@ -99,16 +89,11 @@ public final class PPE {
         return subsidiary;
     }
 
-    public String getPrevSubsidiary() {
-        return prevSubsidiary;
-    }
-
-    public PPE(@JsonProperty("ppeID") final String ppeID, @JsonProperty("ownerName") final String ownerName,
+    public PPE(@JsonProperty("ownerName") final String ownerName,
                @JsonProperty("ownerID") final String ownerID, @JsonProperty("name") final String name,
                @JsonProperty("price") final Float price, @JsonProperty("inventoryNumber") final String inventoryNumber,
                @JsonProperty("startUserDate") final String startUseDate, @JsonProperty("lifeTime") final Integer lifeTime,
-               @JsonProperty("subsidiary") final String subsidiary, @JsonProperty("prevSubsidiary") final String prevSubsidiary) {
-        this.ppeID = ppeID;
+               @JsonProperty("subsidiary") final String subsidiary) {
         this.ownerName = ownerName;
         this.ownerID = ownerID;
         this.name = name;
@@ -117,7 +102,6 @@ public final class PPE {
         this.startUseDate = startUseDate;
         this.lifeTime = lifeTime;
         this.subsidiary = subsidiary;
-        this.prevSubsidiary = prevSubsidiary;
     }
 
     @Override
@@ -133,8 +117,8 @@ public final class PPE {
         PPE other = (PPE) obj;
 
         return Objects.deepEquals(
-                new String[] {getppeID(), getOwnerName(), getOwnerID(), getName(), getStartUseDate(), getInventoryNumber()},
-                new String[] {other.getppeID(), other.getOwnerName(), other.getOwnerID(), other.getName(), other.getStartUseDate(), other.getInventoryNumber()})
+                new String[] {getOwnerName(), getOwnerID(), getName(), getStartUseDate(), getInventoryNumber()},
+                new String[] {other.getOwnerName(), other.getOwnerID(), other.getName(), other.getStartUseDate(), other.getInventoryNumber()})
                 &&
                 Objects.deepEquals(
                 new int[] {getLifeTime()},
@@ -143,14 +127,14 @@ public final class PPE {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getppeID(), getOwnerName(), getOwnerID(),
+        return Objects.hash(getOwnerName(), getOwnerID(),
                 getName(), getPrice(), getInventoryNumber(),
                 getStartUseDate(), getLifeTime(), getSubsidiary());
     }
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + "@" + Integer.toHexString(hashCode()) + " [ppeID = " + ppeID +
+        return this.getClass().getSimpleName() + "@" + Integer.toHexString(hashCode()) + " [" +
                 ", ownerName = " + ownerName + ", ownerID = " + ownerID + ", subsidiary = " + subsidiary +
                 ", PPE name = " + name + ", price = " + price + ", inventory number = " + inventoryNumber +
                 ", date of entry into service = " + startUseDate + ", lifeTime = " + lifeTime + " month" +"]";

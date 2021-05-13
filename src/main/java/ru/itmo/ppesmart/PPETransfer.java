@@ -42,19 +42,18 @@ public final class PPETransfer implements ContractInterface {
     public void InitTestLedger(final Context ctx) {
         ChaincodeStub stub = ctx.getStub();
 
-        CreatePPE(ctx, "ppe1", "Иван Иванов", "001",
+        CreatePPE(ctx, "Иван Иванов", "001",
                 "БЕЛЬЕ НАТ. ТРИКОТАЖ. 60/62 182/188", 182.85F, "720000011068",
-                "10.02.2021", 20, "ГНП-Д1", "none");
-        CreatePPE(ctx, "ppe2", "Петр Петрович", "002",
+                "10.02.2021", 20, "ГПН-Д1");
+        CreatePPE(ctx, "Петр Петрович", "002",
                 "БОТИНКИ КОЖ ВЫС БЕРЦЕМ МЕТ ПОДНОСКОМ 45", 478.16F, "720000010964",
-                "15.02.2021", 15, "ГНП-Д1", "none");
+                "15.02.2021", 15, "ГПН-Д1");
     }
 
     /**
      * Creates a new ppe on the ledger.
      *
      * @param ctx the transaction context
-     * @param ppeID the ID of the new ppe
      * @param ownerName the employee name
      * @param ownerID employee's personnel number
      * @param name PPE name
@@ -63,26 +62,25 @@ public final class PPETransfer implements ContractInterface {
      * @param startUseDate a date when PPE using has been started
      * @param lifeTime a life time to use PPE
      * @param subsidiary a company owned PPE / company where the employee is located
-     * @param prevSubsidiary a company where employee were previously
      * @return the created ppe
      */
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public PPE CreatePPE(final Context ctx, final String ppeID, final String ownerName,
+    public PPE CreatePPE(final Context ctx, final String ownerName,
                            final String ownerID, final String name,
                            final Float price, final String inventoryNumber,
                            final String startUseDate, final Integer lifeTime,
-                           final String subsidiary, final String prevSubsidiary) {
+                           final String subsidiary) {
         ChaincodeStub stub = ctx.getStub();
 
-        if (PPEExists(ctx, ppeID)) {
-            String errorMessage = String.format("PPE %s already exists", ppeID);
+        if (PPEExists(ctx, inventoryNumber)) {
+            String errorMessage = String.format("PPE %s already exists", inventoryNumber);
             System.out.println(errorMessage);
             throw new ChaincodeException(errorMessage, PPETransferErrors.PPE_ALREADY_EXISTS.toString());
         }
 
-        PPE PPE = new PPE(ppeID, ownerName, ownerID, name, price, inventoryNumber, startUseDate, lifeTime, subsidiary, prevSubsidiary);
+        PPE PPE = new PPE(ownerName, ownerID, name, price, inventoryNumber, startUseDate, lifeTime, subsidiary);
         String ppeJSON = genson.serialize(PPE);
-        stub.putStringState(ppeID, ppeJSON);
+        stub.putStringState(inventoryNumber, ppeJSON);
 
         return PPE;
     }
@@ -91,16 +89,16 @@ public final class PPETransfer implements ContractInterface {
      * Retrieves an ppe with the specified ID from the ledger.
      *
      * @param ctx the transaction context
-     * @param ppeID the ID of the ppe
+     * @param inventoryNumber current inventory number of ppe
      * @return the ppe found on the ledger if there was one
      */
     @Transaction(intent = Transaction.TYPE.EVALUATE)
-    public PPE ReadPPE(final Context ctx, final String ppeID) {
+    public PPE ReadPPE(final Context ctx, final String inventoryNumber) {
         ChaincodeStub stub = ctx.getStub();
-        String ppeJSON = stub.getStringState(ppeID);
+        String ppeJSON = stub.getStringState(inventoryNumber);
 
         if (ppeJSON == null || ppeJSON.isEmpty()) {
-            String errorMessage = String.format("ppe %s does not exist", ppeID);
+            String errorMessage = String.format("ppe with inventory number %s does not exist", inventoryNumber);
             System.out.println(errorMessage);
             throw new ChaincodeException(errorMessage, PPETransferErrors.PPE_NOT_FOUND.toString());
         }
@@ -112,16 +110,16 @@ public final class PPETransfer implements ContractInterface {
      * Retrieves an ppe history with the specified ID from the ledger.
      *
      * @param ctx the transaction context
-     * @param ppeID the ID of the ppe
+     * @param inventoryNumber current inventory number of ppe
      * @return the ppe found on the ledger
      */
     @Transaction(intent = Transaction.TYPE.EVALUATE)
-    public String ReadPPEHistory(final Context ctx, final String ppeID) {
+    public String ReadPPEHistory(final Context ctx, final String inventoryNumber) {
         ChaincodeStub stub = ctx.getStub();
-        QueryResultsIterator<KeyModification> ppeHistory = stub.getHistoryForKey(ppeID);
+        QueryResultsIterator<KeyModification> ppeHistory = stub.getHistoryForKey(inventoryNumber);
 
         if (ppeHistory == null) {
-            String errorMessage = String.format("PPE %s history does not exist", ppeID);
+            String errorMessage = String.format("PPE %s history does not exist", inventoryNumber);
             System.out.println(errorMessage);
             throw new ChaincodeException(errorMessage, PPETransferErrors.PPE_NOT_FOUND.toString());
         }
@@ -137,32 +135,30 @@ public final class PPETransfer implements ContractInterface {
     /**
      * Updates the properties of an ppe on the ledger.
      *
-     * @param ctx the transaction context
-     * @param ppeID the ID of the ppe being updated
+     * @param ctx the transaction context=
      * @param ownerID employee's personnel number being updated
      * @param price PPE price being updated
      * @param inventoryNumber PPE inventory number in subsidiary being updated
-     * @param subsidiary a company owned PPE / company where the employee is located being updated
-     * @param prevSubsidiary a company where employee were previously being updated
+     * @param subsidiary a company owned PPE / company where the employee is located being updated=
      * @return the transferred ppe
      */
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public PPE UpdatePPE(final Context ctx, final String ppeID, final String ownerName,
+    public PPE UpdatePPE(final Context ctx, final String ownerName,
                            final String ownerID, final String name,
                            final Float price, final String inventoryNumber,
                            final String startUseDate, final Integer lifeTime,
-                           final String subsidiary, final String prevSubsidiary) {
+                           final String subsidiary) {
         ChaincodeStub stub = ctx.getStub();
 
-        if (!PPEExists(ctx, ppeID)) {
-            String errorMessage = String.format("ppe %s does not exist", ppeID);
+        if (!PPEExists(ctx, inventoryNumber)) {
+            String errorMessage = String.format("ppe %s does not exist", inventoryNumber);
             System.out.println(errorMessage);
             throw new ChaincodeException(errorMessage, PPETransferErrors.PPE_NOT_FOUND.toString());
         }
 
-        PPE newPPE = new PPE(ppeID, ownerName, ownerID, name, price, inventoryNumber, startUseDate, lifeTime, subsidiary, prevSubsidiary);
-        String newppeJSON = genson.serialize(newPPE);
-        stub.putStringState(ppeID, newppeJSON);
+        PPE newPPE = new PPE(ownerName, ownerID, name, price, inventoryNumber, startUseDate, lifeTime, subsidiary);
+        String newPPEJSON = genson.serialize(newPPE);
+        stub.putStringState(inventoryNumber, newPPEJSON);
         System.out.println("Update with: " + newPPE.toString());
 
         return newPPE;
@@ -172,33 +168,33 @@ public final class PPETransfer implements ContractInterface {
      * Deletes ppe on the ledger.
      *
      * @param ctx the transaction context
-     * @param ppeID the ID of the ppe being deleted
+     * @param inventoryNumber PPE inventory number
      */
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public void DeletePPE(final Context ctx, final String ppeID) {
+    public void DeletePPE(final Context ctx, final String inventoryNumber) {
         ChaincodeStub stub = ctx.getStub();
 
-        if (!PPEExists(ctx, ppeID)) {
-            String errorMessage = String.format("ppe %s does not exist", ppeID);
+        if (!PPEExists(ctx, inventoryNumber)) {
+            String errorMessage = String.format("ppe %s does not exist", inventoryNumber);
             System.out.println(errorMessage);
             throw new ChaincodeException(errorMessage, PPETransferErrors.PPE_NOT_FOUND.toString());
         }
 
         System.out.println("ppe {" + stub.getStringArgs().toString() + "} deleted");
-        stub.delState(ppeID);
+        stub.delState(inventoryNumber);
     }
 
     /**
      * Checks the existence of the ppe on the ledger
      *
      * @param ctx the transaction context
-     * @param ppeID the ID of the ppe
+     * @param inventoryNumber PPE inventory number
      * @return boolean indicating the existence of the ppe
      */
     @Transaction(intent = Transaction.TYPE.EVALUATE)
-    public boolean PPEExists(final Context ctx, final String ppeID) {
+    public boolean PPEExists(final Context ctx, final String inventoryNumber) {
         ChaincodeStub stub = ctx.getStub();
-        String ppeJSON = stub.getStringState(ppeID);
+        String ppeJSON = stub.getStringState(inventoryNumber);
 
         return (ppeJSON != null && !ppeJSON.isEmpty());
     }
@@ -207,32 +203,26 @@ public final class PPETransfer implements ContractInterface {
      * Changes the owner of a ppe on the ledger.
      *
      * @param ctx the transaction context
-     * @param ppeID the ID of the ppe being transferred
-     * @param newOwnerID new employee's personnel number for another company
-     * @param newInventoryNumber new inventory number for another company
-     * @param fromSubsidiary the company from which the employee is transferred
      * @param toSubsidiary the company to which the employee is transferred
      * @return the updated ppe
      */
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public PPE TransferPPE(final Context ctx, final String ppeID,
-                             final String newOwnerID, final String newInventoryNumber,
-                             final String fromSubsidiary, final String toSubsidiary) {
+    public PPE TransferPPE(final Context ctx, final String inventoryNumber, final String toSubsidiary) {
         ChaincodeStub stub = ctx.getStub();
-        String ppeJSON = stub.getStringState(ppeID);
+        String ppeJSON = stub.getStringState(inventoryNumber);
 
         if (ppeJSON == null || ppeJSON.isEmpty()) {
-            String errorMessage = String.format("ppe %s does not exist", ppeID);
+            String errorMessage = String.format("ppe %s does not exist", inventoryNumber);
             System.out.println(errorMessage);
             throw new ChaincodeException(errorMessage, PPETransferErrors.PPE_NOT_FOUND.toString());
         }
 
         PPE PPE = genson.deserialize(ppeJSON, PPE.class);
 
-        PPE newPPE = new PPE(PPE.getppeID(), PPE.getOwnerName(), newOwnerID, PPE.getName(), PPE.getPrice(),
-                newInventoryNumber, PPE.getStartUseDate(), PPE.getLifeTime(), toSubsidiary, fromSubsidiary);
-        String newppeJSON = genson.serialize(newPPE);
-        stub.putStringState(ppeID, newppeJSON);
+        PPE newPPE = new PPE(PPE.getOwnerName(), PPE.getOwnerID(), PPE.getName(), PPE.getPrice(),
+                PPE.getInventoryNumber(), PPE.getStartUseDate(), PPE.getLifeTime(), toSubsidiary);
+        String newPPEJSON = genson.serialize(newPPE);
+        stub.putStringState(inventoryNumber, newPPEJSON);
 
         return newPPE;
     }
@@ -252,9 +242,9 @@ public final class PPETransfer implements ContractInterface {
         QueryResultsIterator<KeyValue> results = stub.getStateByRange("", "");
 
         for (KeyValue result: results) {
-            PPE PPE = genson.deserialize(result.getStringValue(), PPE.class);
-            queryResults.add(PPE);
-            System.out.println(PPE.toString());
+            PPE ppe = genson.deserialize(result.getStringValue(), PPE.class);
+            queryResults.add(ppe);
+            System.out.println(ppe.toString());
         }
 
         final String response = genson.serialize(queryResults);
