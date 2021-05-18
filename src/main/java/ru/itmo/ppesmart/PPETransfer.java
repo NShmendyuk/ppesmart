@@ -43,10 +43,12 @@ public final class PPETransfer implements ContractInterface {
         ChaincodeStub stub = ctx.getStub();
 
         CreatePPE(ctx, "Иван Иванов", "001",
-                "БЕЛЬЕ НАТ. ТРИКОТАЖ. 60/62 182/188", 182.85F, "720000011068",
+                "БЕЛЬЕ НАТ. ТРИКОТАЖ. 60/62 182/188", "Введен в эксплуатацию",
+                182.85F, "720000011068",
                 "10.02.2021", 20, "ГПН-Д1");
         CreatePPE(ctx, "Петр Петрович", "002",
-                "БОТИНКИ КОЖ ВЫС БЕРЦЕМ МЕТ ПОДНОСКОМ 45", 478.16F, "720000010964",
+                "БОТИНКИ КОЖ ВЫС БЕРЦЕМ МЕТ ПОДНОСКОМ 45", "Введен в эксплуатацию",
+                478.16F, "720000010964",
                 "15.02.2021", 15, "ГПН-Д1");
     }
 
@@ -57,6 +59,7 @@ public final class PPETransfer implements ContractInterface {
      * @param ownerName the employee name
      * @param ownerID employee's personnel number
      * @param name PPE name
+     * @param status PPE status
      * @param price PPE price
      * @param inventoryNumber PPE inventory number in subsidiary
      * @param startUseDate a date when PPE using has been started
@@ -66,7 +69,7 @@ public final class PPETransfer implements ContractInterface {
      */
     @Transaction(intent = Transaction.TYPE.SUBMIT)
     public PPE CreatePPE(final Context ctx, final String ownerName,
-                           final String ownerID, final String name,
+                           final String ownerID, final String name, final String status,
                            final Float price, final String inventoryNumber,
                            final String startUseDate, final Integer lifeTime,
                            final String subsidiary) {
@@ -78,7 +81,7 @@ public final class PPETransfer implements ContractInterface {
             throw new ChaincodeException(errorMessage, PPETransferErrors.PPE_ALREADY_EXISTS.toString());
         }
 
-        PPE PPE = new PPE(ownerName, ownerID, name, price, inventoryNumber, startUseDate, lifeTime, subsidiary);
+        PPE PPE = new PPE(ownerName, ownerID, name, status, price, inventoryNumber, startUseDate, lifeTime, subsidiary);
         String ppeJSON = genson.serialize(PPE);
         stub.putStringState(inventoryNumber, ppeJSON);
 
@@ -144,7 +147,7 @@ public final class PPETransfer implements ContractInterface {
      */
     @Transaction(intent = Transaction.TYPE.SUBMIT)
     public PPE UpdatePPE(final Context ctx, final String ownerName,
-                           final String ownerID, final String name,
+                           final String ownerID, final String name, final String status,
                            final Float price, final String inventoryNumber,
                            final String startUseDate, final Integer lifeTime,
                            final String subsidiary) {
@@ -156,7 +159,7 @@ public final class PPETransfer implements ContractInterface {
             throw new ChaincodeException(errorMessage, PPETransferErrors.PPE_NOT_FOUND.toString());
         }
 
-        PPE newPPE = new PPE(ownerName, ownerID, name, price, inventoryNumber, startUseDate, lifeTime, subsidiary);
+        PPE newPPE = new PPE(ownerName, ownerID, name, status, price, inventoryNumber, startUseDate, lifeTime, subsidiary);
         String newPPEJSON = genson.serialize(newPPE);
         stub.putStringState(inventoryNumber, newPPEJSON);
         System.out.println("Update with: " + newPPE.toString());
@@ -219,7 +222,7 @@ public final class PPETransfer implements ContractInterface {
 
         PPE PPE = genson.deserialize(ppeJSON, PPE.class);
 
-        PPE newPPE = new PPE(PPE.getOwnerName(), PPE.getOwnerID(), PPE.getName(), PPE.getPrice(),
+        PPE newPPE = new PPE(PPE.getOwnerName(), PPE.getOwnerID(), PPE.getName(), PPE.getStatus(), PPE.getPrice(),
                 PPE.getInventoryNumber(), PPE.getStartUseDate(), PPE.getLifeTime(), toSubsidiary);
         String newPPEJSON = genson.serialize(newPPE);
         stub.putStringState(inventoryNumber, newPPEJSON);

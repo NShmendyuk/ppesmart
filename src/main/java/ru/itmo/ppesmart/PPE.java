@@ -38,6 +38,9 @@ public final class PPE {
     @Property()
     private final Float price;
 
+    @Property()
+    private final String status;
+
     /**
      * Дата поступления СИЗа в эксплуатацию
      */
@@ -69,6 +72,10 @@ public final class PPE {
         return name;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
     public Float getPrice() {
         return price;
     }
@@ -90,13 +97,14 @@ public final class PPE {
     }
 
     public PPE(@JsonProperty("ownerName") final String ownerName,
-               @JsonProperty("ownerID") final String ownerID, @JsonProperty("name") final String name,
+               @JsonProperty("ownerID") final String ownerID, @JsonProperty("name") final String name, @JsonProperty("status") final String status,
                @JsonProperty("price") final Float price, @JsonProperty("inventoryNumber") final String inventoryNumber,
                @JsonProperty("startUserDate") final String startUseDate, @JsonProperty("lifeTime") final Integer lifeTime,
                @JsonProperty("subsidiary") final String subsidiary) {
         this.ownerName = ownerName;
         this.ownerID = ownerID;
         this.name = name;
+        this.status = status;
         this.price = price;
         this.inventoryNumber = inventoryNumber;
         this.startUseDate = startUseDate;
@@ -128,7 +136,7 @@ public final class PPE {
     @Override
     public int hashCode() {
         return Objects.hash(getOwnerName(), getOwnerID(),
-                getName(), getPrice(), getInventoryNumber(),
+                getName(), getStatus(), getPrice(), getInventoryNumber(),
                 getStartUseDate(), getLifeTime(), getSubsidiary());
     }
 
@@ -137,6 +145,7 @@ public final class PPE {
         return this.getClass().getSimpleName() + "@" + Integer.toHexString(hashCode()) + " [" +
                 ", ownerName = " + ownerName + ", ownerID = " + ownerID + ", subsidiary = " + subsidiary +
                 ", PPE name = " + name + ", price = " + price + ", inventory number = " + inventoryNumber +
-                ", date of entry into service = " + startUseDate + ", lifeTime = " + lifeTime + " month" +"]";
+                ", status = " + status + ", date of entry into service = " + startUseDate + ", lifeTime = "
+                + lifeTime + " month" +"]";
     }
 }
