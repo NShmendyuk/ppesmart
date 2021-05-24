@@ -121,7 +121,7 @@ public final class PPETransfer implements ContractInterface {
         StringBuilder infoHistoryString = new StringBuilder();
         while (ppeHistory.iterator().hasNext()) {
             KeyModification keyModification = ppeHistory.iterator().next();
-            infoHistoryString.append("<").append(keyModification.getTxId()).append(":").append(keyModification.getStringValue()).append(">");
+            infoHistoryString.append(keyModification.getStringValue());
         }
 
         return infoHistoryString.toString();
@@ -212,10 +212,10 @@ public final class PPETransfer implements ContractInterface {
             throw new ChaincodeException(errorMessage, PPETransferErrors.PPE_NOT_FOUND.toString());
         }
 
-        PPE PPE = genson.deserialize(ppeJSON, PPE.class);
+        PPE ppe = genson.deserialize(ppeJSON, PPE.class);
 
-        PPE newPPE = new PPE(PPE.getOwnerName(), PPE.getOwnerID(), PPE.getName(), PPE.getStatus(), PPE.getPrice(),
-                PPE.getInventoryNumber(), PPE.getStartUseDate(), PPE.getLifeTime(), toSubsidiary);
+        PPE newPPE = new PPE(ppe.getOwnerName(), ppe.getOwnerID(), ppe.getName(), ppe.getStatus(), ppe.getPrice(),
+                ppe.getInventoryNumber(), ppe.getStartUseDate(), ppe.getLifeTime(), toSubsidiary);
         String newPPEJSON = genson.serialize(newPPE);
         stub.putStringState(inventoryNumber, newPPEJSON);
 
