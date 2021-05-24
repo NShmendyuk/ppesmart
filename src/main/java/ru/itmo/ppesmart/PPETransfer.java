@@ -119,10 +119,12 @@ public final class PPETransfer implements ContractInterface {
             throw new ChaincodeException(errorMessage, PPETransferErrors.PPE_NOT_FOUND.toString());
         }
         StringBuilder infoHistoryString = new StringBuilder();
+        infoHistoryString.append("[");
         while (ppeHistory.iterator().hasNext()) {
             KeyModification keyModification = ppeHistory.iterator().next();
-            infoHistoryString.append(keyModification.getStringValue());
+            infoHistoryString.append(keyModification.getStringValue()).append(", ");
         }
+        infoHistoryString.deleteCharAt(infoHistoryString.length() - 1).deleteCharAt(infoHistoryString.length() - 1).append("]");
 
         return infoHistoryString.toString();
     }
