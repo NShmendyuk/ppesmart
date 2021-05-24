@@ -99,7 +99,7 @@ public final class PPE {
     public PPE(@JsonProperty("ownerName") final String ownerName,
                @JsonProperty("ownerID") final String ownerID, @JsonProperty("name") final String name, @JsonProperty("status") final String status,
                @JsonProperty("price") final Float price, @JsonProperty("inventoryNumber") final String inventoryNumber,
-               @JsonProperty("startUserDate") final String startUseDate, @JsonProperty("lifeTime") final Integer lifeTime,
+               @JsonProperty("startUseDate") final String startUseDate, @JsonProperty("lifeTime") final Integer lifeTime,
                @JsonProperty("subsidiary") final String subsidiary) {
         this.ownerName = ownerName;
         this.ownerID = ownerID;
