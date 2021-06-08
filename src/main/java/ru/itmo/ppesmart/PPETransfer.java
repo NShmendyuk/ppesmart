@@ -200,11 +200,12 @@ public final class PPETransfer implements ContractInterface {
      * Changes the owner of a ppe on the ledger.
      *
      * @param ctx the transaction context
-     * @param toSubsidiary the company to which the employee is transferred
-     * @return the updated ppe
+     * @param transferToSubsidiary the company to which the employee is transferred
+     * @param transferStatus marker of transfering status
+     * @return the updated for transfer ppe
      */
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public PPE transferPPE(final Context ctx, final String inventoryNumber, final String toSubsidiary) {
+    public PPE transferPPE(final Context ctx, final String inventoryNumber, final String transferToSubsidiary, final String transferStatus) {
         ChaincodeStub stub = ctx.getStub();
         String ppeJSON = stub.getStringState(inventoryNumber);
 
@@ -216,8 +217,36 @@ public final class PPETransfer implements ContractInterface {
 
         PPE ppe = genson.deserialize(ppeJSON, PPE.class);
 
-        PPE newPPE = new PPE(ppe.getOwnerName(), ppe.getOwnerID(), ppe.getName(), ppe.getStatus(), ppe.getPrice(),
-                ppe.getInventoryNumber(), ppe.getStartUseDate(), ppe.getLifeTime(), toSubsidiary);
+        PPE newPPE = new PPE(ppe.getOwnerName(), ppe.getOwnerID(), ppe.getName(), transferStatus, ppe.getPrice(),
+                ppe.getInventoryNumber(), ppe.getStartUseDate(), ppe.getLifeTime(), transferToSubsidiary);
+        String newPPEJSON = genson.serialize(newPPE);
+        stub.putStringState(inventoryNumber, newPPEJSON);
+
+        return newPPE;
+    }
+
+    /**
+     *
+     * @param ctx the transaction context
+     * @param inventoryNumber ppe inventory number for apply tranfering process
+     * @param status marker to change status of ppe as applied
+     * @return applied PPE
+     */
+    @Transaction(intent = Transaction.TYPE.SUBMIT)
+    public PPE applyTransferPPE(final Context ctx, final String inventoryNumber, final String status) {
+        ChaincodeStub stub = ctx.getStub();
+        String ppeJSON = stub.getStringState(inventoryNumber);
+
+        if (ppeJSON == null || ppeJSON.isEmpty()) {
+            String errorMessage = String.format("ppe %s does not exist", inventoryNumber);
+            System.out.println(errorMessage);
+            throw new ChaincodeException(errorMessage, PPETransferErrors.PPE_NOT_FOUND.toString());
+        }
+
+        PPE ppe = genson.deserialize(ppeJSON, PPE.class);
+
+        PPE newPPE = new PPE(ppe.getOwnerName(), ppe.getOwnerID(), ppe.getName(), status, ppe.getPrice(),
+                ppe.getInventoryNumber(), ppe.getStartUseDate(), ppe.getLifeTime(), ppe.getSubsidiary());
         String newPPEJSON = genson.serialize(newPPE);
         stub.putStringState(inventoryNumber, newPPEJSON);
 
