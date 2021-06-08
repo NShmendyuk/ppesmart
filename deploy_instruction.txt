@@ -2,6 +2,6 @@ exec next commands
 	mvn compile
 	mvn install
 
-from target copy jar file from target to build/install/lib
+from target copy jar file from target to build/install/ppesmart/lib
 
 deploy chaincode to hlf channel
